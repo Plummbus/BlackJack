@@ -2,24 +2,27 @@ package BlackJack;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.InputMismatchException;
 import java.util.Random;
 import java.util.Scanner;
 
-public class GameControler {
+public class GameController {
 	
-	private static Random rand = new Random();
 	private static Suit[] suits = {Suit.HEARTS, Suit.CLUBS, Suit.SPADES, Suit.DIAMONDS};
-	private static Player player;
-	private static boolean endGame = false;
-	private static Scanner sc = new Scanner(System.in);
+	
+	public static boolean endGame = false;
+	
+	public static Scanner sc = new Scanner(System.in);
+	public static Player player;
+	public static Deck deck;
 
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		welcome();
 		start();
 	}
 	
-	private static void start() {
+	private static void start() throws InterruptedException {
 		player = createPlayer();
 		do {
 			mainMenu();
@@ -28,15 +31,15 @@ public class GameControler {
 		System.out.println("\n\n\nGoodbye!");
 	}
 	
-	private static void mainMenu() {
+	public static void mainMenu() throws InterruptedException {
 		System.out.println("Please select an option: "
 				+ "\n1. Play BlackJack"
 				+ "\n2. Display Player Stats"
-				+ "\n3. Exit");
+				+ "\n3. Display Deck (test)"
+				+ "\n4. Exit");
 		int input = sc.nextInt();
 		switch (input) {
 		case 1:
-			System.out.println("valid 1");
 			blackJack();
 			break;
 		case 2:
@@ -44,6 +47,10 @@ public class GameControler {
 			mainMenu();
 			break;
 		case 3:
+			displayDeck();
+			mainMenu();
+			break;
+		case 4:
 			endGame = true;
 			break;
 		default:
@@ -52,30 +59,12 @@ public class GameControler {
 		}
 	}
 	
-	private static void blackJack() {
-		placeBet();
+	public static void blackJack() throws InterruptedException {
+		GameLoop.placeBet();
+		GameLoop.playGame();
 	}
 	
-	private static void placeBet() {
-		String message = String.format("\n%-10s: %-10d", "Money", player.getMoney());
-		System.out.println("\n-----------------------------------\n"
-				+ "\nHow much would you like to bet this round?"
-				+ message);
-		int bet = sc.nextInt();
-		player.setCurrentBet(bet);
-		String[] phrases = {
-				"Lets hope they win!",
-				"Good luck to you and have fun!",
-				"Wow, we've got a high-roller here!",
-				"Now that's a lot of money!",
-				"I'm rooting for you!",
-				"Never before have I seen so much cash!",
-				"Whoa, I wouldn't be so cavalier with all that money!",
-				"I'm sure we're looking at a winner here!",
-				"Make sure to cash out before you spend it all!"
-		};
-		System.out.println(String.format("%s has bet %d! %s", player.getName(), player.getCurrentBet(), phrases[rand.nextInt(phrases.length)]));
-	}
+	
 	
 	private static void welcome() {
 		String message = "Goodday and welcome to Console BlackJack!. The game is played vs the dealer(computer) and with a deck of 48 cards."
@@ -91,6 +80,7 @@ public class GameControler {
 		return new Player(name);
 	}
 	
+	// remove current bet once all testing is done
 	public static void diagnosticMessage() {
 		String message = String.format("-----------------------------------"
 				+ "\n%-12s: %-10s"
@@ -103,7 +93,9 @@ public class GameControler {
 		System.out.println(message);
 	}
 	
-	private static void createDeck(Deck deck) {
+	
+	//move these to GameLoop once test is no longer needed
+	public static void createDeck(Deck deck) {
 		
 		for (int i = 0; i < 4; i++) {	//suits
 			for (int j = 1; j < 13; j++) { //card values
@@ -112,7 +104,8 @@ public class GameControler {
 		}
 	}
 	
-	private static Deck shuffleDeck(Deck deck) {
+	//move these to GameLoop once test is no longer needed
+	public static Deck shuffleDeck(Deck deck) {
 		Deck newDeck = new Deck();
 		ArrayList<Card> shuffleList = new ArrayList<Card>();
 		while (!deck.isEmpty()) {
@@ -124,5 +117,18 @@ public class GameControler {
 		}
 		return newDeck;
 	}
+	
+	//move these to GameLoop once test is no longer needed
+		private static void displayDeck() {
+			deck = new Deck();
+			GameController.createDeck(deck);
+			
+			System.out.println("\n*********UNSHUFFLED DECK*********\n");
+			deck.printDeck();
+			
+			System.out.println("\n*********SHUFFLED DECK*********\n");
+			deck = GameController.shuffleDeck(deck);
+			deck.printDeck();
+		}
 	
 }

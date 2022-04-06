@@ -1,25 +1,27 @@
 package BlackJack;
 
+import java.util.ArrayList;
+
 public class Player {
 
 	private String name;
 	private int money;
 	private int currentBet;
 	private int total;
-	private boolean wonBet;
-	private Card[] hand;
+	private ArrayList<Card> hand;
 	private int wins;
 	private int losses;
+	private boolean standing;
 	
 	public Player (String name) {
 		this.name = name;
 		this.money = 500;
 		this.currentBet = 0;
 		this.total = 0;
-		this.wonBet = false;
-		this.hand = new Card[2];
+		this.hand = new ArrayList<Card>();
 		this.wins = 0;
 		this.losses = 0;
+		this.standing = false;
 	}
 	
 	public String getName() {
@@ -38,11 +40,7 @@ public class Player {
 		return this.total;
 	}
 	
-	public boolean hasWonBet() {
-		return this.wonBet;
-	}
-	
-	public Card[] getHand() {
+	public ArrayList<Card> getHand() {
 		return this.hand;
 	}
 	
@@ -54,20 +52,33 @@ public class Player {
 		return this.losses;
 	}
 	
-	public void setCurrentBet(int bet) {
-		this.currentBet = bet;
+	public boolean getStanding() {
+		return this.standing;
 	}
 	
-	public void setWonBet(boolean value) {
-		this.wonBet = value;
+	public void setCurrentBet(int bet) {
+		this.currentBet = bet;
+		this.money -= bet;
+	}
+	
+	public void stand() {
+		this.standing = true;
 	}
 	
 	public void win() {
+		this.money += Math.round(getCurrentBet() * 1.5f);
 		this.wins++;
 	}
 	
 	public void lose() {
 		this.losses++;
+	}
+	
+	public void reset() {
+		this.total = 0;
+		this.hand = new ArrayList<Card>();
+		this.currentBet = 0;
+		this.standing = false;
 	}
 	
 	public void printHand() {
@@ -79,18 +90,19 @@ public class Player {
 	//I should be error checking here, but the user doesn't handle this method so its fine
 	//will need to do error checking for Pazaak tho
 	public void addCard(Card card) {
-		if (hand[0] == null) {
-			hand[0] = card;
-		} else {
-			hand[1] = card;
-		}
+		hand.add(card);
 	}
 	
 	public void updateTotal() {
-		if (hasWonBet()) {
-			this.money += Math.round(getCurrentBet() * 1.5f);
-		} else {
-			this.money -= getCurrentBet();
+		this.total = 0; 	//resetting total's value to 0 to make updating easy
+		for (Card card : this.hand) {
+			int actualCardValue;
+			if (card.getValue() >= 10) {
+				actualCardValue = 10;	//K/Q/J represented as 10, 11, 12. need to update here to properly value them at 10
+			} else {
+				actualCardValue = card.getValue();
+			}
+			this.total += actualCardValue;
 		}
 	}
 }
