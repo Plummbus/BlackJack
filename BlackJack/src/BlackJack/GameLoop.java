@@ -99,6 +99,7 @@ public class GameLoop {
 		System.out.println(message);
 	}
 	
+	//no card-sharks allowed here, deck resets upon each new game
 	private static void startOfGame() throws InterruptedException {
 		deck = new Deck();
 		createDeck(deck);
@@ -118,13 +119,27 @@ public class GameLoop {
 		boolean endOfGame = false;
 		boolean winnerFound = false;
 		
+		
 		while (!endOfGame) {
 			if (player.getTotal() < 21 && dealer.getTotal() < 21) {
-				if (player.getStanding() != true) {
+				//the "&& dealer/player.getTotal() <= 21" is so we don't draw AS SOON as someone busts. Once a bust has occured, the game is immediately over.
+				if (player.getStanding() != true && dealer.getTotal() <= 21) {
 					playerTurn();
 				}
-				if (dealer.getStanding() != true) {
+				if (dealer.getStanding() != true && player.getTotal() <= 21) {
 					dealerTurn();
+				}
+				
+				if (dealer.getStanding()) {
+					String message = String.format("The dealer is standing"
+							+ "\nDealer's Total: %d", dealer.getTotal());
+					System.out.println(message);
+				}
+				
+				if (player.getStanding()) {
+					String message = String.format("%s is standing"
+							+ "\n%s Total: %d", player.getName(), player.getName(), player.getTotal());
+					System.out.println(message);
 				}
 			}
 			
@@ -132,6 +147,7 @@ public class GameLoop {
 				endOfGame = true;
 			}
 		}
+		
 		
 		if (player.getTotal() == 21 || (player.getTotal() < 21 && dealer.getTotal() > 21)) {	//don't have to make cause for tie since we're making player win ties and if statements short-circuit 
 			endGameMessage(true);
@@ -219,12 +235,11 @@ public class GameLoop {
 				int input = sc.nextInt();
 				switch (input) {
 				case 1:
-					//System.out.println("1 was hit!");
 					draw(true);
 					validInput = true;
 					break;
 				case 2:
-					
+					player.stand();
 					validInput = true;
 					break;
 				default:
@@ -236,13 +251,32 @@ public class GameLoop {
 				sc.next();
 			}
 		}
-		
-		System.out.println("WE GOT TO THE END of playerTurn");
-		
 	}
 	
 	private static void dealerTurn() throws InterruptedException {
-		draw(false);
+		//is the player standing?
+		if (player.getStanding()) {
+			//if the player IS standing, then compare dealer's total to player's total
+			//if the dealer's total is less than the player's, then...
+			if (dealer.getTotal() < player.getTotal()) {
+				//...make the dealer draw (because they would lose if they chose stand at this point)
+				draw(false);
+			} else {
+				//since the dealer's total is more than the player's
+				//then dealer can just stand and win
+				dealer.stand();
+			}
+		} else {
+			//if the player is NOT standing and they are not at 21, then check if the dealer's total is high enough to warrant a stand (18+)
+			if (dealer.getTotal() >= 18 && player.getTotal() != 21) {
+				//since it is likely dealer would bust at this total, the dealer should stand
+				dealer.stand();
+			//if the player is standing or is NOT standing but at 21, keep drawing
+			} else {
+				//since it is NOT likely the dealer would bust at this total, the dealer should draw
+				draw(false);
+			}
+		}
 	}
 	
 	private static void draw(boolean isPlayer) throws InterruptedException {
@@ -255,12 +289,19 @@ public class GameLoop {
 			player.updateTotal();
 			message = String.format("You drew a %s"
 					+ "Your current total is: %d\n", Deck.cardInfo(card), player.getTotal());
+			if (player.getTotal() > 21) {
+				String bustMessage = String.format("%s BUSTS!!!", player.getName());
+				System.out.println(bustMessage);
+			}
 			
 		} else {
 			dealer.addCard(card);
 			dealer.updateTotal();
 			message = String.format("Dealer drew a %s"
 					+ "The Dealer's current total is: %d\n", Deck.cardInfo(card), dealer.getTotal());
+			if (dealer.getTotal() > 21) {
+				System.out.println("Dealer BUSTS!!!");
+			}
 		}
 		System.out.println(message);
 	}

@@ -22,8 +22,9 @@ public class Dealer {
 		return this.standing;
 	}
 	
-	public void standing() {
+	public void stand() {
 		this.standing = true;
+		System.out.println("Dealer chooses to STAND!");
 	}
 	
 	public void addCard(Card card) {

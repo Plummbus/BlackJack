@@ -58,11 +58,11 @@ public class Player {
 	
 	public void setCurrentBet(int bet) {
 		this.currentBet = bet;
-		this.money -= bet;
 	}
 	
 	public void stand() {
 		this.standing = true;
+		System.out.println(this.getName() + " chooses to STAND!");
 	}
 	
 	public void win() {
@@ -71,6 +71,7 @@ public class Player {
 	}
 	
 	public void lose() {
+		this.money -= this.getCurrentBet();
 		this.losses++;
 	}
 	
